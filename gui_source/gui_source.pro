@@ -2,7 +2,7 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = nfd
+TARGET = xad
 TEMPLATE = app
 
 include(../build.pri)
@@ -26,17 +26,17 @@ FORMS    += guimainwindow.ui \
 
 !contains(XCONFIG, archive_widget) {
     XCONFIG += archive_widget
-    include(../../_mylibs/archive_widget/archive_widget.pri)
+    include(../archive_widget/archive_widget.pri)
 }
 
-!contains(XCONFIG, nfd_widget) {
-    XCONFIG += nfd_widget
-    include(../../_mylibs/nfd_widget/nfd_widget.pri)
+!contains(XCONFIG, formresult) {
+    XCONFIG += formresult
+    include(../StaticScan/formresult.pri)
 }
 
 !contains(XCONFIG, allformatwidgets) {
     XCONFIG += allformatwidgets
-    include(../../_mylibs/FormatWidgets/allformatwidgets.pri)
+    include(../FormatWidgets/allformatwidgets.pri)
 }
 
 !contains(XCONFIG, xoptions) {

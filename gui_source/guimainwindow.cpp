@@ -31,7 +31,17 @@ GuiMainWindow::GuiMainWindow(QWidget *parent) :
 
     setAcceptDrops(true);
 
-    DialogOptions::loadOptions(&nfdOptions);
+    xOptions.setName(X_OPTIONSFILE);
+
+    QList<XOptions::ID> listIDs;
+
+    listIDs.append(XOptions::ID_SCANAFTEROPEN);
+    listIDs.append(XOptions::ID_STAYONTOP);
+    listIDs.append(XOptions::ID_SAVELASTDIRECTORY);
+    listIDs.append(XOptions::ID_LASTDIRECTORY);
+
+    xOptions.setValueIDs(listIDs);
+    xOptions.load();
     adjust();
 
     if(QCoreApplication::arguments().count()>1)
@@ -42,28 +52,27 @@ GuiMainWindow::GuiMainWindow(QWidget *parent) :
 
 GuiMainWindow::~GuiMainWindow()
 {
-    DialogOptions::saveOptions(&nfdOptions);
+    xOptions.save();
 
     delete ui;
 }
 
-void GuiMainWindow::_handleFile(QString sFileName)
+void GuiMainWindow::handleFile(QString sFileName)
 {
-    if(sFileName!="")
-    {
-        ui->widgetArchive->setData(sFileName);
-    }
-}
-
-void GuiMainWindow::handleFile(QString sName)
-{
-    QFileInfo fi(sName);
+    QFileInfo fi(sFileName);
 
     if(fi.isFile())
     {
-        ui->lineEditFileName->setText(sName);
+        ui->lineEditFileName->setText(sFileName);
         
-        _handleFile(sName);
+        ui->widgetArchive->setData(sFileName);
+
+        if(xOptions.isScanAfterOpen())
+        {
+            scanFile(sFileName);
+        }
+
+        xOptions.setLastDirectory(sFileName);
     }
 }
 
@@ -74,25 +83,13 @@ void GuiMainWindow::on_pushButtonExit_clicked()
 
 void GuiMainWindow::on_pushButtonOpenFile_clicked()
 {
-    QString sDirectory;
-
-    if( (nfdOptions.bSaveLastDirectory)&&
-        (nfdOptions.sLastDirectory!="")&&
-        (QDir().exists(nfdOptions.sLastDirectory)))
-    {
-        sDirectory=nfdOptions.sLastDirectory;
-    }
+    QString sDirectory=xOptions.getLastDirectory();
 
     QString sFileName=QFileDialog::getOpenFileName(this,tr("Open file")+QString("..."),sDirectory,tr("All files")+QString(" (*)"));
 
     if(!sFileName.isEmpty())
     { 
         handleFile(sFileName);
-    
-        if(nfdOptions.bScanAfterOpen)
-        {
-            // TODO
-        }
     }
 }
 
@@ -100,8 +97,10 @@ void GuiMainWindow::on_pushButtonScan_clicked()
 {
     QString sFileName=ui->lineEditFileName->text().trimmed();
 
-    // TODO
-//    handleFile(sFileName);
+    if(sFileName!="")
+    {
+        scanFile(sFileName);
+    }
 }
 
 void GuiMainWindow::on_pushButtonAbout_clicked()
@@ -123,11 +122,11 @@ void GuiMainWindow::dragMoveEvent(QDragMoveEvent *event)
 
 void GuiMainWindow::dropEvent(QDropEvent *event)
 {
-    const QMimeData* mimeData=event->mimeData();
+    const QMimeData *pMimeData=event->mimeData();
 
-    if(mimeData->hasUrls())
+    if(pMimeData->hasUrls())
     {
-        QList<QUrl> urlList=mimeData->urls();
+        QList<QUrl> urlList=pMimeData->urls();
 
         if(urlList.count())
         {
@@ -135,7 +134,7 @@ void GuiMainWindow::dropEvent(QDropEvent *event)
 
             sFileName=XBinary::convertFileName(sFileName);
 
-            if(nfdOptions.bScanAfterOpen)
+            if(xOptions.isScanAfterOpen())
             {
                 handleFile(sFileName);
             }
@@ -145,7 +144,7 @@ void GuiMainWindow::dropEvent(QDropEvent *event)
 
 void GuiMainWindow::on_pushButtonOptions_clicked()
 {
-    DialogOptions dialogOptions(this,&nfdOptions);
+    DialogOptions dialogOptions(this,&xOptions);
 
     dialogOptions.exec();
 
@@ -154,32 +153,100 @@ void GuiMainWindow::on_pushButtonOptions_clicked()
 
 void GuiMainWindow::adjust()
 {
-    Qt::WindowFlags wf=windowFlags();
-
-    if(nfdOptions.bStayOnTop)
-    {
-        wf|=Qt::WindowStaysOnTopHint;
-    }
-    else
-    {
-        wf&=~(Qt::WindowStaysOnTopHint);
-    }
-    setWindowFlags(wf);
-
-    show();
+    xOptions.adjustStayOnTop(this);
 }
 
 void GuiMainWindow::on_pushButtonHex_clicked()
 {
+    QString sFileName=ui->lineEditFileName->text().trimmed();
 
+    if(sFileName!="")
+    {
+        QFile file;
+        file.setFileName(sFileName);
+
+        if(file.open(QIODevice::ReadOnly))
+        {
+            DialogHex dialogHex(this,&file);
+
+            dialogHex.exec();
+
+            file.close();
+        }
+    }
 }
 
 void GuiMainWindow::on_pushButtonStrings_clicked()
 {
+    QString sFileName=ui->lineEditFileName->text().trimmed();
 
+    if(sFileName!="")
+    {
+        QFile file;
+        file.setFileName(sFileName);
+
+        if(file.open(QIODevice::ReadOnly))
+        {
+            DialogSearchStrings dialogSearchStrings(this,&file,nullptr,true);
+
+            dialogSearchStrings.exec();
+
+            file.close();
+        }
+    }
 }
 
 void GuiMainWindow::on_pushButtonHash_clicked()
 {
+    QString sFileName=ui->lineEditFileName->text().trimmed();
 
+    if(sFileName!="")
+    {
+        QFile file;
+        file.setFileName(sFileName);
+
+        if(file.open(QIODevice::ReadOnly))
+        {
+            DialogHash dialogHash(this,&file);
+
+            dialogHash.exec();
+
+            file.close();
+        }
+    }
+}
+
+void GuiMainWindow::on_pushButtonEntropy_clicked()
+{
+    QString sFileName=ui->lineEditFileName->text().trimmed();
+
+    if(sFileName!="")
+    {
+        QFile file;
+        file.setFileName(sFileName);
+
+        if(file.open(QIODevice::ReadOnly))
+        {
+            DialogEntropy dialogEntropy(this,&file);
+
+            dialogEntropy.exec();
+
+            file.close();
+        }
+    }
+}
+
+void GuiMainWindow::scanFile(QString sFileName)
+{
+    QFile file;
+    file.setFileName(sFileName);
+
+    if(file.open(QIODevice::ReadOnly))
+    {
+        DialogStaticScan dialogStaticScan(this,&file,true);
+
+        dialogStaticScan.exec();
+
+        file.close();
+    }
 }
