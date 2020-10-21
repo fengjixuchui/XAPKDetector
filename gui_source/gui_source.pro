@@ -6,6 +6,7 @@ TARGET = xad
 TEMPLATE = app
 
 include(../build.pri)
+XCONFIG += use_dex
 
 SOURCES +=\
         guimainwindow.cpp \
@@ -41,7 +42,7 @@ FORMS    += guimainwindow.ui \
 
 !contains(XCONFIG, dexwidget) {
     XCONFIG += dexwidget
-    include(../../_mylibs/FormatWidgets/DEX/dexwidget.pri)
+    include(../FormatWidgets/DEX/dexwidget.pri)
 }
 
 !contains(XCONFIG, xoptions) {
