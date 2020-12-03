@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2020 hors<horsicq@gmail.com>
+// Copyright (c) 2020 hors<horsicq@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,7 @@
 #include <QMimeData>
 #include "dialogabout.h"
 #include "dialogoptions.h"
+#include "archive_widget.h"
 #include "xoptions.h"
 
 namespace Ui
@@ -56,6 +57,7 @@ private slots:
     void on_pushButtonHash_clicked();
     void on_pushButtonEntropy_clicked();
     void scanFile(QString sFileName);
+    void on_pushButtonClassesDex_clicked();
 
 protected:
     void dragEnterEvent(QDragEnterEvent *pEvent) override;
@@ -65,6 +67,7 @@ protected:
 private:
     Ui::GuiMainWindow *ui;
     XOptions xOptions;
+    FW_DEF::OPTIONS fwOptions;
 };
 
 #endif // GUIMAINWINDOW_H

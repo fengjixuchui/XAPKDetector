@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2020 hors<horsicq@gmail.com>
+// Copyright (c) 2020 hors<horsicq@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,10 @@ GuiMainWindow::GuiMainWindow(QWidget *pParent) :
 
     setAcceptDrops(true);
 
+    fwOptions={};
+
+    ui->pushButtonClassesDex->setEnabled(false);
+
     xOptions.setName(X_OPTIONSFILE);
 
     QList<XOptions::ID> listIDs;
@@ -44,6 +48,12 @@ GuiMainWindow::GuiMainWindow(QWidget *pParent) :
     listIDs.append(XOptions::ID_LASTDIRECTORY);
 
     xOptions.setValueIDs(listIDs);
+
+//    QMap<XOptions::ID,QVariant> mapDefaultValues;
+//    mapDefaultValues.insert(XOptions::ID_QSS,"");
+
+//    xOptions.setDefaultValues(mapDefaultValues);
+
     xOptions.load();
     adjust();
 
@@ -68,7 +78,9 @@ void GuiMainWindow::handleFile(QString sFileName)
     {
         ui->lineEditFileName->setText(sFileName);
         
-        ui->widgetArchive->setData(sFileName);
+        ui->widgetArchive->setData(sFileName,&fwOptions);
+
+        ui->pushButtonClassesDex->setEnabled(XArchives::isArchiveRecordPresent(sFileName,"classes.dex"));
 
         if(xOptions.isScanAfterOpen())
         {
@@ -248,5 +260,40 @@ void GuiMainWindow::scanFile(QString sFileName)
         dialogStaticScan.exec();
 
         file.close();
+    }
+}
+
+void GuiMainWindow::on_pushButtonClassesDex_clicked()
+{
+    QString sFileName=ui->lineEditFileName->text().trimmed();
+
+    if(sFileName!="")
+    {
+        QTemporaryFile fileTemp;
+
+        if(fileTemp.open())
+        {
+            QString sTempFileName=fileTemp.fileName();
+
+            if(XArchives::decompressToFile(sFileName,"classes.dex",sTempFileName))
+            {
+                QFile file;
+                file.setFileName(sTempFileName);
+
+                if(file.open(QIODevice::ReadOnly))
+                {
+                    fwOptions.nStartType=SDEX::TYPE_HEADER;
+                    fwOptions.sTitle="classes.dex";
+
+                    DialogDEX dialogDEX(this);
+
+                    dialogDEX.setData(&file,&fwOptions);
+
+                    dialogDEX.exec();
+
+                    file.close();
+                }
+            }
+        }
     }
 }

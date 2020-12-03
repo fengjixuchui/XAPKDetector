@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 hors<horsicq@gmail.com>
+// Copyright (c) 2020 hors<horsicq@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 
     QCommandLineOption clRecursiveScan(QStringList()<<"r"<<"recursivescan","Recursive scan.");
     QCommandLineOption clDeepScan(QStringList()<<"d"<<"deepscan","Deep scan.");
-    QCommandLineOption clHeuristicScan(QStringList()<<"h"<<"heuristicscan","Heuristic scan.");
+    QCommandLineOption clHeuristicScan(QStringList()<<"e"<<"heuristicscan","Heuristic scan.");
     QCommandLineOption clResultAsXml(QStringList()<<"x"<<"xml","Result as XML.");
     QCommandLineOption clResultAsJson(QStringList()<<"j"<<"json","Result as JSON.");
 

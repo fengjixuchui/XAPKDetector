@@ -1,15 +1,15 @@
 set VS_PATH="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community"
-set QT_PATH=C:\Qt\5.15.1\msvc2019
+set QT_PATH=C:\Qt\5.15.1\msvc2019_64
 set SEVENZIP_PATH="C:\Program Files\7-Zip"
 
-set BUILD_NAME=xapkdetector_win32_portable
+set BUILD_NAME=xapkdetector_win64_portable
 set SOURCE_PATH=%~dp0
 mkdir %SOURCE_PATH%\build
 mkdir %SOURCE_PATH%\release
 set /p RELEASE_VERSION=<%SOURCE_PATH%\release_version.txt
 
 set QT_PATH=%QT_PATH%
-call %VS_PATH%\VC\Auxiliary\Build\vcvars32.bat
+call %VS_PATH%\VC\Auxiliary\Build\vcvars64.bat
 set GUIEXE=xad.exe
 set CONEXE=xadc.exe
 set ZIP_NAME=%BUILD_NAME%_%RELEASE_VERSION%
@@ -71,9 +71,10 @@ copy %QT_PATH%\plugins\imageformats\qtiff.dll %SOURCE_PATH%\release\%BUILD_NAME%
 copy %QT_PATH%\plugins\imageformats\qico.dll %SOURCE_PATH%\release\%BUILD_NAME%\imageformats\
 copy %QT_PATH%\plugins\imageformats\qgif.dll %SOURCE_PATH%\release\%BUILD_NAME%\imageformats\
 
-copy %VS_PATH%\VC\Redist\MSVC\14.27.29016\x86\Microsoft.VC142.CRT\msvcp140.dll %SOURCE_PATH%\release\%BUILD_NAME%\
-copy %VS_PATH%\VC\Redist\MSVC\14.27.29016\x86\Microsoft.VC142.CRT\vcruntime140.dll %SOURCE_PATH%\release\%BUILD_NAME%\
-copy %VS_PATH%\VC\Redist\MSVC\14.27.29016\x86\Microsoft.VC142.CRT\msvcp140_1.dll %SOURCE_PATH%\release\%BUILD_NAME%\
+copy %VS_PATH%\VC\Redist\MSVC\14.27.29016\x64\Microsoft.VC142.CRT\msvcp140.dll %SOURCE_PATH%\release\%BUILD_NAME%\
+copy %VS_PATH%\VC\Redist\MSVC\14.27.29016\x64\Microsoft.VC142.CRT\vcruntime140.dll %SOURCE_PATH%\release\%BUILD_NAME%\
+copy %VS_PATH%\VC\Redist\MSVC\14.27.29016\x64\Microsoft.VC142.CRT\msvcp140_1.dll %SOURCE_PATH%\release\%BUILD_NAME%\
+copy %VS_PATH%\VC\Redist\MSVC\14.27.29016\x64\Microsoft.VC142.CRT\vcruntime140_1.dll %SOURCE_PATH%\release\%BUILD_NAME%\
 
 xcopy %SOURCE_PATH%\XStyles\qss %SOURCE_PATH%\release\%BUILD_NAME%\qss /E /I
 
